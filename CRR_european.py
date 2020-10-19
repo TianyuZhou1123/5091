@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-def CRR_european_option_value(S0, K, T, r, sigma, q, type, N): #calculate the V[0,0] for r and sigma
+def CRR_european_option_value(S0, K, T, r, sigma, q, type, N): 
 
 
     ''' Cox-Ross-Rubinstein European option valuation.
