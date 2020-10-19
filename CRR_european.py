@@ -83,3 +83,6 @@ def CRR_european_option_value2(S0, K, T, r, sigma, q, type, N):
     rho = (v2 - v1)/(0.02*r)
     
     return v,delta,gamma,theta,vega,rho
+
+v,delta,gamma,theta,vega,rho = CRR_european_option_value2(100, 100, 1, 0.06, 0.2, 0.03, "call", 100)
+print(v,delta,gamma,theta,vega,rho)
