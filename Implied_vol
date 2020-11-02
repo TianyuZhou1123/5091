@@ -16,7 +16,7 @@ def bs_pricing(s,k,r,T,sigma,option_type):
         return None
 
 #bisection method
-def imp_vol_binary(s,k,r,T,close,option_type):
+def imp_vol_binary(s,k,r,T,close,option_type): #close is the option price
     c_est = 0
     top = 4  # highiest
     floor = 0  # lowest
@@ -32,25 +32,15 @@ def imp_vol_binary(s,k,r,T,close,option_type):
             sigma = (sigma + floor) / 2
     return sigma
 
-def imp_vol_newton(s,k,r,T,close,option_type,sigma_est=0.5,it=50):
-    if option_type == 'call':
-        for i in range(it):
-            call = bs_pricing(s,k,r,T,sigma_est,option_type)
-            d1 = (np.log(s / k) + (r + 1 / 2 * sigma_est ** 2) * T) / (sigma_est * np.sqrt(T))
-            vega = s * np.sqrt(T) * stats.norm.pdf(d1)
-            sigma_est -= (call - close) /vega
-        return sigma_est
-    elif option_type == 'put':
-        for i in range(it):
-            put = bs_pricing(s,k,r,T,sigma_est,option_type)
-            d1 = (np.log(s / k) + (r + 1 / 2 * sigma_est ** 2) * T) / (sigma_est * np.sqrt(T))
-            vega = s * np.sqrt(T) * stats.norm.pdf(d1)
-            sigma_est -= (put - close) /vega
-            print(sigma_est)
-        return sigma_est
-    else:
-        return None
+def imp_vol_newton(s,k,r,T,close,option_type,sigma_est=0.5):
+    c_est=0
+    while abs(close - c_est) > 1e-8:
+        c_est = bs_pricing(s,k,r,T,sigma_est,option_type)
+        d1 = (np.log(s / k) + (r + 1 / 2 * sigma_est ** 2) * T) / (sigma_est * np.sqrt(T))
+        vega = s * np.sqrt(T) * stats.norm.pdf(d1)
+        sigma_est -= (c_est - close) /vega  #to get f'(x)=0
+    return sigma_est
         
-bs_pricing(100,100,0.04,2,0.2,'call')
-imp_vol_binary(100,100,0.04,2,16,'call')
-imp_vol_newton(100,100,0.04,2,16,'call')
+bs_pricing(20,30,0.05,1,0.2,'call')
+imp_vol_binary(28,30,0.05,1,3.66,"call")
+imp_vol_newton(28,30,0.05,1,3.66,"call")
