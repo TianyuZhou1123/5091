@@ -109,3 +109,8 @@ plt.subplot(312)
 plt.plot(OG2,'o')
 plt.title('Reconstruct Original Data')
 plt.show()
+#for the same sector, the eigenvalues are$[1.87105308e-04 1.46434107e-04 7.56235815e-05 4.64292217e-05]$,  the PC1 can explain 41.07% data, PC1+PC2 can explain 73.21% data, which means that PC1+PC2 can explain the most of the data in the data set. PC1+PC2+PC3=89.81% data and PC4=10.19% data. 
+
+
+#for the different sectors, the eigenvalues are$[1.80617458e-04 7.69521445e-05 4.95284031e-05 3.81511407e-05]$,the PC1 can explain 52.31% data,  which means that PC1 can explain the most of the data in the data set, PC1+PC2 can explain 74.60% data. PC1+PC2+PC3=88.95% data and PC4=11.05% data.
+
