@@ -1,0 +1,111 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+#configurate database
+import quandl
+quandl.ApiConfig.api_key = "gDpZLGRcLSxEH-2tA65y"
+from sqlalchemy import create_engine
+engine = create_engine('mysql+pymysql://root:147258@localhost:3306/mydatabase')
+## Read data and save the data to SQL
+#instrument table
+same_list = ['CAT', 'GE', 'MMM', 'UTX']
+diff_list = ['MSFT', 'CAT', 'PG', 'XOM']
+company_info = pd.DataFrame([[1,'Microsoft','MSFT','NASDAQ','Technology'],
+                             [2,'General Electric','GE','NYSE','Industrial Goods'],
+                             [3,'Caterpillar','CAT','NYSE','Industrial Goods'],
+                             [4,'3M','MMM','NYSE','Industrial Goods'],
+                             [5,'United Technologies','UTX','NYSE','Industrial Goods'],
+                             [6,'Procter&Gamble','PG','NYSE','Consumer Goods'],
+                             [7,'Exxon Mobil','XOM','NYSE','Basic Materials']],columns=['ID','CompanyName', 'Ticker', 'Market', 'Sector'])
+company_info.to_sql('instrument', engine, if_exists='replace', index=False)
+company_info = pd.read_sql('select * from instrument', engine)
+
+#price table
+for i in company_info.index:
+    instID,stk = company_info.loc[i,'ID'],company_info.loc[i,'Ticker']
+    stock_data = quandl.get('EOD/'+stk, start_date="2017-01-01", end_date="2017-12-31")
+    stock_data = stock_data.reset_index()
+    stock_data.insert(0,'InstID',instID)
+    if i == 0 :
+        stock_data.to_sql('price', engine, if_exists='replace', index=True)
+    else:
+        stock_data.to_sql('price', engine, if_exists='append', index=True)
+
+company_info      
+## Two data sets
+#read data from SQL
+same_data = pd.DataFrame()
+diff_data = pd.DataFrame()
+for stk in same_list:
+    instid = company_info[company_info['Ticker'] == stk]['ID'].iloc[0]
+    same_data[stk] = pd.read_sql('select * from price where InstID = {}'.format(instid), engine, index_col='Date')['Adj_Close']
+    
+for stk in diff_list:
+    instid = company_info[company_info['Ticker'] == stk]['ID'].iloc[0]
+    diff_data[stk] = pd.read_sql('select * from price where InstID = {}'.format(instid), engine, index_col='Date')['Adj_Close']
+
+same_data = np.log(same_data/same_data.shift(1)).dropna()
+diff_data = np.log(diff_data/diff_data.shift(1)).dropna()
+same_data
+diff_data
+def PCA(data):
+    ## Step 2: Build a covariance matrix
+    cov_array = np.cov(data, rowvar =False)
+
+    ## Step 3: Perform eigendecomposition
+    eigenvalues, eigenvectors = np.linalg.eig(cov_array)
+    print('Eigenvalues:',eigenvalues)
+    # Calculate the explanation proportion of each eigenvalues
+    prop = np.array([i/np.sum(eigenvalues) for i in eigenvalues])
+    reduce_n = np.argwhere(np.cumsum(prop) > 0.85)[0,0]
+    print('Explanation proportion of each eigenvalues:',np.cumsum(prop))
+
+    ## Step 4: Reduce dimensionality
+    size = data.shape[0]
+    norm_g_reduce = np.zeros(size * data.shape[1]).reshape(size,data.shape[1])
+    for i in range(data.shape[1]):
+        norm_g_reduce[:,i] = data.iloc[:,i] - np.mean(data.iloc[:,i])
+    reduce_dimension = np.dot(norm_g_reduce, eigenvectors[np.arange(0,reduce_n+1)].T)
+
+    ## Step 5: Reconstruct original data
+    OG = reduce_dimension.copy()
+    for i in range(OG.shape[1]):
+        OG[:,i] = OG[:,i] + np.mean(data.iloc[:,i])
+    
+    return reduce_dimension,OG
+    reduce_dimension1,OG1 = PCA(same_data)
+    
+## Some figures
+# Original Data
+plt.subplot(311)
+plt.plot(np.array(same_data),'o')
+plt.title('Original Data')
+plt.show()
+# Dimensional reduction data
+plt.subplot(312)
+plt.plot(reduce_dimension1,'o')
+plt.title('Dimensional Reduction Data')
+plt.show()
+# Reconstruct Original Data
+plt.subplot(312)
+plt.plot(OG1,'o')
+plt.title('Reconstruct Original Data')
+plt.show()
+
+reduce_dimension2,OG2 = PCA(diff_data)
+## Some figures
+# Original Data
+plt.subplot(311)
+plt.plot(np.array(diff_data),'o')
+plt.title('Original Data')
+plt.show()
+# Dimensional reduction data
+plt.subplot(312)
+plt.plot(reduce_dimension2,'o')
+plt.title('Dimensional Reduction Data')
+plt.show()
+# Reconstruct Original Data
+plt.subplot(312)
+plt.plot(OG2,'o')
+plt.title('Reconstruct Original Data')
+plt.show()
