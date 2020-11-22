@@ -26,22 +26,23 @@ namespace HW_5
             u2 = rnd.NextDouble();
 
             z1 = Math.Sqrt(-2 * Math.Log(u1)) * Math.Cos(2 * Math.PI * u2);
-            z2 = Math.Sqrt(-2 * Math.Log(u1)) * Math.Sin(2 * Math.PI * u2);
+            z2 = Math.Sqrt(-2 * Math.Log(u1)) * Math.Sin(2*Math.PI*u2);
             return Tuple.Create(z1, z2);
         }
         public static Tuple<double, double> Polar_rejection()
         {
             Random rnd = new Random();
             double u1, u2, v1 = 0, v2 = 0, s =0, z1 = 0, z2 = 0;
-            while (s > 1 || s == 0) 
+            do
             {
                 u1 = rnd.NextDouble();
                 u2 = rnd.NextDouble();
-                v1 = 2 * u1 - 1;//satisfy the evenly distributed in[-1,1]
+                v1 = 2 * u1 - 1;
                 v2 = 2 * u2 - 1;
                 s = v1 * v1 + v2 * v2;
 
             }
+            while (s > 1 || s == 0);
             z1 = Math.Sqrt(-2 * Math.Log(s) / s) * v1;
             z2 = Math.Sqrt(-2 * Math.Log(s) / s) * v2;
             return Tuple.Create(z1,z2);
@@ -49,9 +50,19 @@ namespace HW_5
         public static Tuple<double, double> joint_normal(double rho)
         {
             Random rnd = new Random();
-            double episilon1, episilon2, z1 = 0, z2 = 0;
-            episilon1 = rnd.NextDouble();
-            episilon2 = rnd.NextDouble();
+            double u1, u2, v1 = 0, v2 = 0, s = 0, episilon1=0, episilon2=0,z1=0,z2=0;
+            do
+            {
+                u1 = rnd.NextDouble();
+                u2 = rnd.NextDouble();
+                v1 = 2 * u1 - 1;
+                v2 = 2 * u2 - 1;
+                s = v1 * v1 + v2 * v2;
+
+            }
+            while (s > 1 || s == 0);
+            episilon1 = Math.Sqrt(-2 * Math.Log(s) / s) * v1;
+            episilon2 = Math.Sqrt(-2 * Math.Log(s) / s) * v2;//episilon1 and episilon2 are normal random value,here use the polar rejection method to get 
             z1 = episilon1;
             z2 = rho* z1 + episilon2 * Math.Sqrt(1 - rho * rho);
             return Tuple.Create(z1, z2);
@@ -65,7 +76,7 @@ namespace HW_5
             Console.WriteLine("Straightway:{0}",HW_5.Standard_Normal_Random.Straightway(0));
             Console.WriteLine("Polar-rejection:{0}",HW_5.Standard_Normal_Random.Polar_rejection());
             Console.WriteLine("Box-Muller:{0}",HW_5.Standard_Normal_Random.Box_Muller());
-            Console.WriteLine("input the rho");
+            Console.WriteLine("input the rho");//rho belongs to[-1,1]
             double k = Convert.ToDouble(Console.ReadLine());
             Console.WriteLine("joint normal:{0}", HW_5.Standard_Normal_Random.joint_normal(k));
         }
