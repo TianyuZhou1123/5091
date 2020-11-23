@@ -77,7 +77,12 @@ namespace HW_5
             Console.WriteLine("Polar-rejection:{0}",HW_5.Standard_Normal_Random.Polar_rejection());
             Console.WriteLine("Box-Muller:{0}",HW_5.Standard_Normal_Random.Box_Muller());
             Console.WriteLine("input the rho");//rho belongs to[-1,1]
-            double k = Convert.ToDouble(Console.ReadLine());
+            double k = Convert.ToDouble(Console.ReadLine());//k is the rho
+            while(k>=1||k<=-1)
+            {
+                Console.WriteLine("Please input the rho between -1 and 1:");
+                k = Convert.ToDouble(Console.ReadLine());
+            }
             Console.WriteLine("joint normal:{0}", HW_5.Standard_Normal_Random.joint_normal(k));
         }
 
